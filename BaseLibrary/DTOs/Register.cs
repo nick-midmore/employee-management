@@ -6,7 +6,7 @@ public class Register : AccountBase
     [MinLength(5)]
     [MaxLength(100)]
     [Required]
-    public string? Email { get; set; }
+    public string? FullName { get; set; }
 
     [DataType(DataType.Password)]
     [Compare(nameof(Password))]
