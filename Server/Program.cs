@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")?? 
-        throw new InvalidOperationException("Connection string not found"));
+        throw new InvalidOperationException("Connection string invalid"));
 });
 
 builder.Services.Configure<JwtSection>(builder.Configuration.GetSection("JwtSection"));
