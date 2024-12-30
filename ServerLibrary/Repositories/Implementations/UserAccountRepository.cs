@@ -58,7 +58,7 @@ public class UserAccountRepository(IOptions<JwtSection> config, AppDbContext con
 
         if (!BCrypt.Net.BCrypt.Verify(user.Password, applicationUser.Password)) return new LoginResponse(false, "Invalid email/password combination");
 
-        var getUserRole = GetUserRole(applicationUser.Id);
+        var getUserRole = await GetUserRole(applicationUser.Id);
         if (getUserRole is null) return new LoginResponse(false, "User role not found");
 
         var getRoleName = await GetRoleName(applicationUser.Id);
@@ -66,6 +66,18 @@ public class UserAccountRepository(IOptions<JwtSection> config, AppDbContext con
 
         string jwtToken = GenerateToken(applicationUser, getRoleName!.Name!);
         string refreshToken = GenerateRefreshToken();
+
+        var findUser = await context.RefreshTokenInfo.FirstOrDefaultAsync(t => t.UserId == applicationUser.Id);
+        if (findUser != null)
+        {
+            findUser!.Token = refreshToken;
+            await context.SaveChangesAsync();
+        }
+        else
+        {
+            await AddToDb(new RefreshTokenInfo() { Token = refreshToken, UserId = applicationUser.Id });
+        }
+        
         return new LoginResponse(true, "Login successful", jwtToken, refreshToken);
     }
 
@@ -106,7 +118,7 @@ public class UserAccountRepository(IOptions<JwtSection> config, AppDbContext con
         if (token == null) return new LoginResponse(false, "Model is empty");
 
         var findToken = await context.RefreshTokenInfo.FirstOrDefaultAsync(ti => ti.Token!.Equals(token.Token));
-        if (findToken == null) return new LoginResponse(false, "Refresh token is required");
+        if (findToken == null) return new LoginResponse(false, "Invalid token");
 
         var user = await context.ApplicationUsers.FirstOrDefaultAsync(au => au.Id == findToken.UserId);
         if (user == null) return new LoginResponse(false, "Refresh token does not match any user");
