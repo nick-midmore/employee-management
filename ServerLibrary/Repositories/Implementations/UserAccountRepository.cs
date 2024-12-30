@@ -15,7 +15,7 @@ using System.Text;
 namespace ServerLibrary.Repositories.Implementations;
 public class UserAccountRepository(IOptions<JwtSection> config, AppDbContext context) : IUserAccount
 {
-    public async Task<GeneralResponse> CreateAsync(Register user)
+    public async Task<GeneralResponse> RegisterAsync(Register user)
     {
         if (user is null) return new GeneralResponse(false, "Model is empty");
 

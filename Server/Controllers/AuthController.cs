@@ -9,10 +9,10 @@ namespace Server.Controllers;
 public class AuthController(IUserAccount accountInterface) : ControllerBase
 {
     [HttpPost("register")]
-    public async Task<IActionResult> CreateAsync(Register user)
+    public async Task<IActionResult> RegisterAsync(Register user)
     {
         if (user == null) return BadRequest("Model is empty");
-        var result = await accountInterface.CreateAsync(user);
+        var result = await accountInterface.RegisterAsync(user);
         return Ok(result);
     }
 
