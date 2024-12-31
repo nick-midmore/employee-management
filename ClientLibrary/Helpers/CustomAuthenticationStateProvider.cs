@@ -22,6 +22,23 @@ public class CustomAuthenticationStateProvider(LocalStorageService localStorageS
         return await Task.FromResult(new AuthenticationState(claimsPrincipal));
     }
 
+    public async Task UpdateAuthenticationState(UserSession userSession)
+    {
+        var claimsPrincipal = new ClaimsPrincipal();
+        if(userSession != null || userSession.RefreshToken != null)
+        {
+            var serialiseSession = Serialisations.SerialiseObj(userSession);
+            await localStorageService.SetToken(serialiseSession);
+            var getUserClaims = DecryptToken(userSession.Token!);
+            claimsPrincipal = SetClaimPrincipal(getUserClaims);
+        }
+        else
+        {
+            await localStorageService.RemoveToken();
+        }
+        NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
+    }
+
     private static ClaimsPrincipal SetClaimPrincipal(CustomUserClaims claims)
     {
         if (claims.Email == null) return new ClaimsPrincipal();
