@@ -1,0 +1,27 @@
+﻿@page "/"
+
+@inject NavigationManager NavManager
+@code {
+    [CascadingParameter] public Task<AuthenticationState> AuthenticationState { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (AuthenticationState == null)
+        {
+            NavManager.NavigateTo("/identity/account/login");
+            return;
+        }
+
+        var authState = await AuthenticationState;
+        var user = authState?.User;
+
+        if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            NavManager.NavigateTo("/home/dashboard");
+        }
+        else
+        {
+            NavManager.NavigateTo("/identity/account/login");
+        }
+    }
+}
